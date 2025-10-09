@@ -79,44 +79,48 @@ function App() {
   useEffect(() => {
     if (!isPlaying || playMode !== 'preview') return;
 
-    // In preview mode, play notes automatically with a delay
+    const currentNote = filteredNotes[expectedNoteIndex];
+    if (!currentNote) {
+      // No more notes, stop playing
+      setIsPlaying(false);
+      return;
+    }
+
+    const referenceTime = currentNote.time;
+
+    // Find all notes at the same time (chord)
+    const chordNotes = filteredNotes.filter((n) =>
+      timesAreClose(n.time, referenceTime, NOTE_TIME_TOLERANCE)
+    );
+
+    // Calculate when to play: use the original MIDI timing
+    // For the first note or when resuming, play immediately
+    const delayMs = expectedNoteIndex === 0 ? 0 : Math.max(0, (referenceTime - currentTime) * 1000);
+
     const timeoutId = setTimeout(() => {
-      const currentNote = filteredNotes[expectedNoteIndex];
-      if (currentNote) {
-        const referenceTime = currentNote.time;
+      // Play all notes in the chord simultaneously
+      console.log('Auto-playing chord:', chordNotes.map(n => n.name).join(', '));
+      chordNotes.forEach((note) => {
+        playNote(note.midi, note.duration, note.velocity / 127);
+      });
 
-        // Find all notes at the same time (chord)
-        const chordNotes = filteredNotes.filter((n) =>
-          timesAreClose(n.time, referenceTime, NOTE_TIME_TOLERANCE)
-        );
+      setScore((prev) => ({ ...prev, correct: prev.correct + chordNotes.length }));
 
-        // Play all notes in the chord simultaneously
-        console.log('Auto-playing chord:', chordNotes.map(n => n.name).join(', '));
-        chordNotes.forEach((note) => {
-          playNote(note.midi, note.duration, note.velocity / 127);
-        });
-
-        setScore((prev) => ({ ...prev, correct: prev.correct + chordNotes.length }));
-
-        // Move to the next time position (skip all notes in this chord)
-        let nextIndex = expectedNoteIndex;
-        while (
-          nextIndex < filteredNotes.length &&
-          timesAreClose(filteredNotes[nextIndex].time, referenceTime, NOTE_TIME_TOLERANCE)
-        ) {
-          nextIndex += 1;
-        }
-
-        setExpectedNoteIndex(nextIndex);
-        setCurrentTime(referenceTime);
-      } else {
-        // No more notes, stop playing
-        setIsPlaying(false);
+      // Move to the next time position (skip all notes in this chord)
+      let nextIndex = expectedNoteIndex;
+      while (
+        nextIndex < filteredNotes.length &&
+        timesAreClose(filteredNotes[nextIndex].time, referenceTime, NOTE_TIME_TOLERANCE)
+      ) {
+        nextIndex += 1;
       }
-    }, 500); // Half second delay between chords in preview mode
+
+      setExpectedNoteIndex(nextIndex);
+      setCurrentTime(referenceTime);
+    }, delayMs);
 
     return () => clearTimeout(timeoutId);
-  }, [isPlaying, playMode, expectedNoteIndex, filteredNotes, playNote]);
+  }, [isPlaying, playMode, expectedNoteIndex, filteredNotes, playNote, currentTime]);
 
   // Reset last played note when playback stops or resets
   useEffect(() => {
@@ -216,12 +220,12 @@ function App() {
     setShowPianoHelp(false);
   };
 
-  const handlePlay = async () => {
+  const handleStartPractice = async () => {
     if (filteredNotes.length === 0) {
       alert('Please load a MIDI file and select at least one track');
       return;
     }
-    if (playMode === 'practice' && !isConnected) {
+    if (!isConnected) {
       alert('Please connect to a Bluetooth MIDI device first for practice mode');
       return;
     }
@@ -229,8 +233,23 @@ function App() {
     // Resume audio context (required by browsers)
     await resumeAudio();
 
+    setPlayMode('practice');
     setIsPlaying(true);
-    console.log('Playback started. Mode:', playMode, 'Notes:', filteredNotes.length);
+    console.log('Practice mode started. Notes:', filteredNotes.length);
+  };
+
+  const handleStartPreview = async () => {
+    if (filteredNotes.length === 0) {
+      alert('Please load a MIDI file and select at least one track');
+      return;
+    }
+
+    // Resume audio context (required by browsers)
+    await resumeAudio();
+
+    setPlayMode('preview');
+    setIsPlaying(true);
+    console.log('Preview mode started. Notes:', filteredNotes.length);
   };
 
   const handlePause = () => {
@@ -346,32 +365,6 @@ function App() {
             </div>
 
             <div className="setting-group">
-              <label className="setting-label">Mode:</label>
-              <div className="radio-group">
-                <label className="radio-item">
-                  <input
-                    type="radio"
-                    name="mode"
-                    value="practice"
-                    checked={playMode === 'practice'}
-                    onChange={(e) => setPlayMode(e.target.value as PlayMode)}
-                  />
-                  <span>Practice (Play correct notes to advance)</span>
-                </label>
-                <label className="radio-item">
-                  <input
-                    type="radio"
-                    name="mode"
-                    value="preview"
-                    checked={playMode === 'preview'}
-                    onChange={(e) => setPlayMode(e.target.value as PlayMode)}
-                  />
-                  <span>Preview (Auto-play with timing)</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="setting-group">
               <label className="setting-label">Display:</label>
               <label className="radio-item">
                 <input
@@ -436,9 +429,24 @@ function App() {
             <h2>Playback</h2>
             <div className="playback-controls">
               {!isPlaying ? (
-                <button onClick={handlePlay} className="btn-primary" disabled={filteredNotes.length === 0}>
-                  Start
-                </button>
+                <>
+                  <button
+                    onClick={handleStartPractice}
+                    className="btn-primary"
+                    disabled={filteredNotes.length === 0}
+                    title="Play correct notes on your piano to advance"
+                  >
+                    Start Practice
+                  </button>
+                  <button
+                    onClick={handleStartPreview}
+                    className="btn-primary"
+                    disabled={filteredNotes.length === 0}
+                    title="Auto-play with original MIDI timing"
+                  >
+                    Start Preview
+                  </button>
+                </>
               ) : (
                 <button onClick={handlePause} className="btn-primary">
                   Pause
@@ -448,6 +456,7 @@ function App() {
                 Reset
               </button>
             </div>
+            <p>Mode: <strong>{playMode === 'practice' ? 'Practice' : 'Preview'}</strong></p>
             <p>Time: {currentTime.toFixed(2)}s</p>
             <p>Note: {expectedNoteIndex + 1} / {filteredNotes.length}</p>
           </section>
