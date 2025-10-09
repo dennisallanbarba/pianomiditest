@@ -1,0 +1,349 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.app-header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.main-content {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.control-panel {
+  flex: 0 0 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.staff-section {
+  flex: 1;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+}
+
+section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #34495e;
+}
+
+/* Buttons */
+button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d;
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.load-midi-btn {
+  background-color: #2ecc71;
+  color: white;
+  width: 100%;
+}
+
+.load-midi-btn:hover {
+  background-color: #27ae60;
+}
+
+/* Bluetooth section */
+.bluetooth-section p {
+  margin: 0.5rem 0;
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* MIDI section */
+.midi-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #ecf0f1;
+  border-radius: 4px;
+}
+
+.midi-info p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+/* Track selector */
+.track-selector-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.track-item:hover {
+  background-color: #e9ecef;
+}
+
+.track-item input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.track-name {
+  font-size: 0.9rem;
+  color: #34495e;
+}
+
+/* Playback controls */
+.playback-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.playback-section p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #34495e;
+}
+
+/* Score display */
+.score-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.stat.correct {
+  background-color: #d5f4e6;
+  color: #27ae60;
+}
+
+.stat.incorrect {
+  background-color: #fadbd8;
+  color: #e74c3c;
+}
+
+.stat.missed {
+  background-color: #fef5e7;
+  color: #f39c12;
+}
+
+.stat.accuracy {
+  background-color: #ebf5fb;
+  color: #3498db;
+  grid-column: span 2;
+}
+
+.stat .label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.stat .value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Staff renderer */
+.staff-renderer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.staff-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #95a5a6;
+  font-size: 1.2rem;
+}
+
+/* Settings section */
+.settings-section .setting-group {
+  margin-bottom: 1.5rem;
+}
+
+.settings-section .setting-group:last-child {
+  margin-bottom: 0;
+}
+
+.setting-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #2c3e50;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.radio-item:hover {
+  background-color: #e9ecef;
+}
+
+.radio-item input[type="radio"] {
+  cursor: pointer;
+}
+
+.radio-item span {
+  font-size: 0.9rem;
+  color: #34495e;
+}
+
+/* Audio controls */
+.audio-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.volume-control label {
+  font-size: 0.9rem;
+  color: #34495e;
+  font-weight: normal;
+}
+
+.volume-control input[type="range"] {
+  flex: 1;
+  min-width: 100px;
+}
+
+.volume-control input[type="range"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.volume-value {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .control-panel {
+    flex: 0 0 auto;
+  }
+}
