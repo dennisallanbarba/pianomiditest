@@ -105,6 +105,36 @@ const extractTimeSignature = (attributes: Element): [number, number] | null => {
   return null;
 };
 
+// Map fifths value to key signature name
+const FIFTHS_TO_KEY: Record<number, string> = {
+  '-7': 'Cb',
+  '-6': 'Gb',
+  '-5': 'Db',
+  '-4': 'Ab',
+  '-3': 'Eb',
+  '-2': 'Bb',
+  '-1': 'F',
+  '0': 'C',
+  '1': 'G',
+  '2': 'D',
+  '3': 'A',
+  '4': 'E',
+  '5': 'B',
+  '6': 'F#',
+  '7': 'C#',
+};
+
+const extractKeySignature = (attributes: Element): string | null => {
+  const fifths = attributes.querySelector('key > fifths')?.textContent?.trim();
+  if (fifths) {
+    const fifthsNum = parseInt(fifths, 10);
+    if (!Number.isNaN(fifthsNum)) {
+      return FIFTHS_TO_KEY[fifthsNum] || 'C';
+    }
+  }
+  return null;
+};
+
 const parseMusicXMLContent = (xmlContent: string, sourceName: string): ParsedMIDI => {
   const parser = createParser();
   const doc = parser.parseFromString(xmlContent, 'application/xml');
@@ -118,6 +148,7 @@ const parseMusicXMLContent = (xmlContent: string, sourceName: string): ParsedMID
   const trackStates = new Map<string, TrackState>();
   const timeSignatureSet = new Map<string, { timeSignature: number[]; ticks: number }>();
   const tempoEvents: { bpm: number; ticks: number }[] = [];
+  const keySignatures: string[] = [];
 
   let tempoBPM = DEFAULT_TEMPO;
   let secondsPerBeat = 60 / tempoBPM;
@@ -155,6 +186,11 @@ const parseMusicXMLContent = (xmlContent: string, sourceName: string): ParsedMID
                 ticks: 0,
               });
             }
+          }
+
+          const keySig = extractKeySignature(child);
+          if (keySig && !keySignatures.includes(keySig)) {
+            keySignatures.push(keySig);
           }
           return;
         }
@@ -254,6 +290,7 @@ const parseMusicXMLContent = (xmlContent: string, sourceName: string): ParsedMID
       ppq: DEFAULT_DIVISIONS,
       tempos: tempoEvents.length > 0 ? tempoEvents : [{ bpm: tempoBPM, ticks: 0 }],
       timeSignatures: Array.from(timeSignatureSet.values()),
+      keySignatures,
     },
   };
 };

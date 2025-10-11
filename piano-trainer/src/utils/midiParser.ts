@@ -2,6 +2,25 @@ import { Midi } from '@tonejs/midi';
 import type { ParsedMIDI, MIDITrack, MIDINote } from '../types/midi';
 import { midiToNoteName } from './noteUtils';
 
+// Map MIDI key signature to key name (for major keys)
+const MIDI_KEY_TO_NAME: Record<number, string> = {
+  '-7': 'Cb',
+  '-6': 'Gb',
+  '-5': 'Db',
+  '-4': 'Ab',
+  '-3': 'Eb',
+  '-2': 'Bb',
+  '-1': 'F',
+  '0': 'C',
+  '1': 'G',
+  '2': 'D',
+  '3': 'A',
+  '4': 'E',
+  '5': 'B',
+  '6': 'F#',
+  '7': 'C#',
+};
+
 export const parseMIDIFile = async (file: File): Promise<ParsedMIDI> => {
   const arrayBuffer = await file.arrayBuffer();
   const midi = new Midi(arrayBuffer);
@@ -22,6 +41,23 @@ export const parseMIDIFile = async (file: File): Promise<ParsedMIDI> => {
     };
   });
 
+  // Extract key signatures from MIDI header
+  const keySignatures: string[] = [];
+  const rawKeySignatures = (midi.header as any).keySignatures;
+  if (Array.isArray(rawKeySignatures) && rawKeySignatures.length > 0) {
+    rawKeySignatures.forEach((ks: any) => {
+      // MIDI key signatures have a 'key' property (number of sharps/flats)
+      // Positive = sharps, Negative = flats
+      // Scale: 0 = major, 1 = minor (we'll use major for now)
+      if (typeof ks === 'object' && 'key' in ks) {
+        const keyName = MIDI_KEY_TO_NAME[ks.key] || 'C';
+        if (!keySignatures.includes(keyName)) {
+          keySignatures.push(keyName);
+        }
+      }
+    });
+  }
+
   return {
     name: midi.name || file.name,
     tracks: tracks.filter((track) => track.notes.length > 0),
@@ -33,6 +69,7 @@ export const parseMIDIFile = async (file: File): Promise<ParsedMIDI> => {
         timeSignature: ts.timeSignature,
         ticks: ts.ticks,
       })),
+      keySignatures,
     },
   };
 };

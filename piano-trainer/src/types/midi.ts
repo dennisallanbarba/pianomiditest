@@ -20,6 +20,7 @@ export interface ParsedMIDI {
     ppq: number;
     tempos: { bpm: number; ticks: number }[];
     timeSignatures: { timeSignature: number[]; ticks: number }[];
+    keySignatures: any[];
   };
 }
 
