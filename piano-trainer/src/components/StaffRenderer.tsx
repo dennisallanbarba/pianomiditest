@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { NOTE_TIME_TOLERANCE, timesAreClose, midiToNoteName, durationToVexFlowType, calculateMeasures } from '../utils/noteUtils';
-import { Stave, Renderer, StaveNote, Accidental, Voice, Formatter, StaveConnector, Beam } from 'vexflow';
+import { Stave, Renderer, StaveNote, Accidental, Voice, Formatter, StaveConnector } from 'vexflow';
 import type { MIDINote, ParsedMIDI } from '../types/midi';
 import type { ClefFilter } from '../App';
 import { getClefForNote } from '../utils/midiParser';
@@ -911,32 +911,6 @@ export const StaffRenderer: React.FC<StaffRendererProps> = ({
 
     return closestNote.noteIndex;
   }, [notes, measureLayout, SYSTEM_SPACING, STAVE_MARGIN_LEFT, MEASURE_WIDTH]);
-
-  // Helper: find canvas position from note index
-  const findCanvasPositionFromNoteIndex = useCallback((noteIndex: number): { x: number; y: number } | null => {
-    if (noteIndex < 0 || noteIndex >= notes.length) return null;
-
-    const note = notes[noteIndex];
-
-    // Find the measure containing this note
-    const measure = measureLayout.find(m =>
-      note.time >= m.startTime && note.time < m.endTime
-    );
-
-    if (!measure) return null;
-
-    // Calculate position within the measure
-    const measureStartX = STAVE_MARGIN_LEFT + (measure.measureInSystem * MEASURE_WIDTH);
-    const measureDuration = measure.endTime - measure.startTime;
-    const noteTimeInMeasure = note.time - measure.startTime;
-    const relativeX = measureDuration > 0 ? noteTimeInMeasure / measureDuration : 0;
-
-    // Calculate canvas coordinates
-    const x = measureStartX + (relativeX * MEASURE_WIDTH);
-    const y = measure.systemIndex * SYSTEM_SPACING;
-
-    return { x, y };
-  }, [notes, measureLayout, STAVE_MARGIN_LEFT, MEASURE_WIDTH, SYSTEM_SPACING]);
 
   // Mouse event handler - simple click to select note
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {

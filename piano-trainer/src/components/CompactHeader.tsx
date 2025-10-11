@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppBar, Toolbar, Box, Chip, Typography, Tooltip } from '@mui/material';
-import { CheckCircle, Cancel, DoNotDisturb, Piano, MusicNote } from '@mui/icons-material';
+import { CheckCircle, Cancel, DoNotDisturb, Piano } from '@mui/icons-material';
 
 interface CompactHeaderProps {
   correct: number;
